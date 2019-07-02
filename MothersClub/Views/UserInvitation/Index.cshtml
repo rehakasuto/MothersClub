@@ -1,0 +1,145 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="breadcrumbs">
+    <div class="breadcrumbs-inner">
+        <div class="row m-0">
+            <div class="col-sm-4">
+                <div class="page-header float-left">
+                    <div class="page-title">
+                        <h1>Sleepy Anneler Kulübü</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="page-header float-right">
+                    <div class="page-title">
+                        <ol class="breadcrumb text-right">
+                            <li><a href="/">Anasayfa</a></li>
+                            <li class="active">Kullanıcı Davet Et</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <!-- Animated -->
+    <div class="animated fadeIn">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header"><strong>Kullanıcı</strong><small id="action"> Davet Et</small></div>
+                    <div class="card-body card-block">
+                        <form action="#" method="post" id="sendInvitation">
+                            <div class="row form-group">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label for="email" class=" form-control-label">E-Posta</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
+                                            <input type="email" required id="email" placeholder="E-Posta adresini giriniz..." class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions form-group">
+                                <button id="btnSendInvitation" type="submit" class="btn btn-primary btn-sm">Davet Gönder</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="userInvitations">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">Davet Edilen Kullanıcılar</div>
+                        <div class="card-body--">
+                            <div class="table-stats order-table ov-h">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Davet Edilen Kişi</th>
+                                            <th>Davet Edilme Tarihi</th>
+                                            <th>Davet Durumu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div> <!-- /.table-stats -->
+                        </div>
+                    </div> <!-- /.card -->
+                </div>  <!-- /.col-lg-12 -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        loadUserInvitations();
+        $("#sendInvitation").submit(function (event) {
+            event.preventDefault();
+            inviteUser();
+        });
+
+        function inviteUser() {
+            $('#btnSendInvitation').attr('disabled', true);
+            $('#btnSendInvitation').text('Gönderiliyor...');
+            $.ajax({
+                url: "/UserInvitation/InviteUser?email=" + $('#email').val(),
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    loadUserInvitations();
+                    ResetInputs();
+                    $.notify(response.responseText, "success");
+                },
+                error: function (err) {
+                    loadUserInvitations();
+                    ResetInputs();
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+
+        function ResetInputs() {
+            $('#email').val('').attr("placeholder", "E-Posta adresini giriniz...");
+            $('#btnSendInvitation').removeAttr('disabled');
+            $('#btnSendInvitation').text('Davet Gönder');
+        }
+
+        function loadUserInvitations() {
+            $.ajax({
+                url: "/UserInvitation/RetrieveUserInvitations",
+                method: 'GET',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    if (data.length > 0) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var obj = data[i];
+                            var _class = obj.invitationStatus === 1 ? "badge badge-complete" : "badge badge-passive";
+                            var stateMessage = obj.invitationStatus === 1 ? "İletildi" : "İletilemedi";
+                            html += "<tr><td class='toLowerString'>" + obj.mailAddress + "</td>><td>" + parseJsonDate(obj.createdDate) + "</td><td><span class='" + _class + "'>" + stateMessage + "</span></td></tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td>Sonuç Bulunamadı...</td></tr>";
+                    }
+                    $('.userInvitations tbody').html(html);
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,90 @@
+﻿
+/* user notifications */
+.notifications {
+    position: fixed;
+    bottom: 10px;
+    z-index: 9999;
+}
+
+    .notifications span {
+        cursor: pointer;
+        float: left;
+        margin: 5px 3px;
+        padding: 5px 5px 5px 3px;
+        font-size: 14px;
+        color: #fff;
+        opacity: 0;
+        transition: .9s all;
+        box-shadow: 1px 1px 3px rgba(0,0,0,.3);
+    }
+
+        .notifications span::before, .notifications span::after {
+            display: inline-block;
+            font: normal normal normal 14px/1 PointrIcons;
+            font-size: 16px;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-transform: translate(0, 0);
+            -ms-transform: translate(0, 0);
+            transform: translate(0, 0);
+            padding: 0 5px;
+        }
+
+        .notifications span::after {
+            content: '\e025';
+            padding: 0 0 0 10px;
+            font-size: 7px;
+            top: -8px;
+            position: relative;
+        }
+
+        .notifications span.live {
+            opacity: 1;
+        }
+
+        .notifications span.error {
+            background: #c84e52;
+        }
+
+            .notifications span.error::before {
+                content: '\e093';
+            }
+
+        .notifications span.confirm {
+            background: #66cc33;
+        }
+
+            .notifications span.confirm::before {
+                content: '\e020';
+            }
+
+        .notifications span.info {
+            background: #0b304f;
+        }
+
+            .notifications span.info::before {
+                content: '\e043';
+            }
+
+.offline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 99999;
+    background-color: #fff;
+}
+
+    .offline::after {
+        content: "Please check your internet connection!";
+        font-size: 2em;
+        color: #000;
+        font-weight: bold;
+        display: block;
+        height: 100%;
+        width: 100%;
+        padding-top: 5em;
+        text-align: center;
+    }

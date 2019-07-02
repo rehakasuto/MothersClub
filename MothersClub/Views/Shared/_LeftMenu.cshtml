@@ -1,0 +1,68 @@
+﻿<aside id="left-panel" class="left-panel">
+    <nav class="navbar navbar-expand-sm navbar-default">
+        <div id="main-menu" class="main-menu collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="/"><i class="menu-icon fa fa-home"></i>Anasayfa </a>
+                </li>
+                @if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+                {
+                    <li>
+                        <a href="~/UserReferenceAdmin/Index"> <i class="menu-icon fa fa-users"></i>Referanslar</a>
+                    </li>
+                    <li>
+                        <a href="~/Campaign/Index"> <i class="menu-icon fa fa-bullhorn"></i>Kampanya Detayı</a>
+                    </li>
+                    <li>
+                        <a href="~/Log/Index"> <i class="menu-icon fa fa-list-ul"></i>Loglar</a>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <a href="~/UserInvitation/Index"> <i class="menu-icon ti-email"></i>Kullanıcı Davet Et</a>
+                    </li>
+                    <li>
+                        <a href="~/UserReference/Index"> <i class="menu-icon ti-link"></i>Davetliler</a>
+                    </li>
+                    <li>
+                        <a href="~/Discount/Index"> <i class="menu-icon fa fa-money"></i>İndirimler</a>
+                    </li>
+                }
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </nav>
+</aside>
+
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        setActiveElement();
+
+        function setActiveElement() {
+            //find the longest match and set it as active
+            var elPart = "";
+            var tempLength = 0;
+            var pathName = window.location.pathname.toLowerCase();
+            $('.main-menu ul li a').each(function (idx, el) {
+                elPart = $(el).attr('href').toLowerCase().replace(/\//g, '');
+                if (pathName.replace(/\//g, '') === elPart) {
+                    var liNameLength = $(el).attr('href').toLowerCase().replace(/\//g, '').length;
+                    if (liNameLength > tempLength) {
+                        tempLength = liNameLength;//longest length
+                    }
+                }
+            });
+
+            $('.main-menu ul li a').each(function (idx, el) {
+                elPart = $(el).attr('href').toLowerCase().replace(/\//g, '');
+                if (pathName.replace(/\//g, '') === elPart) {
+                    if ($(el).attr('href').toLowerCase().replace(/\//g, '').length == tempLength) {//check longest or not
+                        $(el).parent().addClass('active');
+                    }
+                }
+            });
+        }
+    });
+
+
+</script>

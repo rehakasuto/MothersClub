@@ -1,0 +1,214 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content">
+    <!-- Animated -->
+    <div class="animated fadeIn">
+        @if (ViewBag.IsAdmin != null && ViewBag.IsAdmin)
+        {
+            <span class="isAdmin" hidden>true</span>
+            <div class="row">
+                <!--<div class="col-lg-4 col-md-4">
+                    <div class="card weather-box">
+                        <h4 class="weather-title box-title">Weather</h4>
+                        <div class="card-body">
+                            <div class="weather-widget">
+                                <div id="weather-one" class="weather-one"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="col-lg-4 col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-user text-primary border-primary"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Toplam Kullanıcılar</div>
+                                    <div class="stat-digit" id="totalPortalUserCount"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="stat-widget-one">
+                                <div class="stat-icon dib"><i class="ti-link text-primary border-primary"></i></div>
+                                <div class="stat-content dib">
+                                    <div class="stat-text">Referans Olan Kullanıcılar</div>
+                                    <div class="stat-digit" id="totalReferenceCount"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <span class="isAdmin" hidden>false</span>
+            <div class="col-sm-12 mb-4">
+                <div class="card-group">
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-user-plus"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="userInvitationCount"></span>
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Davetiye Yolladığım Kişiler</small>
+                        </div>
+                    </div>
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-plus"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="allUserReferenceCount"></span>
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Davetiyemi Onaylayan Kişiler</small>
+                        </div>
+                    </div>
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-users"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="userReferenceCount"></span>
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Aktif Referans Olduklarım</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 mb-4">
+                <div class="card-group">
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-cart-plus"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="userReferenceOrderCount"></span>
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Davetlilerin Toplam Sipariş Sayısı</small>
+                        </div>
+                    </div>
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-money"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="referenceWaitingDiscount"></span> TL
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Bekleyen İndirim Miktarı</small>
+                        </div>
+                    </div>
+                    <div class="card col-md-6 no-padding ">
+                        <div class="card-body">
+                            <div class="h1 text-muted text-right mb-4">
+                                <i class="fa fa-money"></i>
+                            </div>
+                            <div class="h4 mb-0">
+                                <span id="referenceTotalDiscount"></span> TL
+                            </div>
+                            <small class="text-muted text-uppercase font-weight-bold">Kazandığım İndirim Miktarı</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        var isAdmin = $('.isAdmin').text();
+        if (isAdmin == "true") {
+            //loadWeather('Istanbul', '');
+            loadAdminHomeDatas();
+        }
+        else {
+            loadWebUserHomeDatas();
+        }
+
+        function loadAdminHomeDatas() {
+            $.ajax({
+                url: "/Home/RetrieveAdminHomeDatas",
+                method: 'GET',
+                contentType: 'application/javascript',
+                success: function (obj) {
+                    $("#totalPortalUserCount").text(obj.portalUserCount);
+                    $("#totalReferenceCount").text(obj.referenceUserCount);
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+
+        function loadWebUserHomeDatas() {
+            $.ajax({
+                url: "/Home/RetrieveWebUserHomeDatas",
+                method: 'GET',
+                contentType: 'application/javascript',
+                success: function (obj) {
+                    $("#userInvitationCount").text(obj.userInvitationCount);
+                    $("#userReferenceCount").text(obj.userReferenceCount);
+                    $('#referenceWaitingDiscount').text(obj.referenceWaitingDiscount);
+                    $("#referenceTotalDiscount").text(obj.referenceTotalDiscount);
+                    $("#userReferenceOrderCount").text(obj.userReferenceOrderCount);
+                    $('#allUserReferenceCount').text(obj.allUserReferenceCount);
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+
+        //function loadWeather(location, woeid) {
+        //    $.simpleWeather({
+        //        location: location,
+        //        woeid: woeid,
+        //        unit: 'f',
+        //        success: function (weather) {
+        //            html = '<div class="top">';
+        //            html += '<i class="wi wi-yahoo-' + weather.code + '"></i>';
+        //            html += '<div class="currently">' + weather.currently + '</div>';
+        //            html += '<div class="updates">' + weather.forecast[0].day + ', ' + weather.forecast[0].date + '</div>';
+        //            html += '</div>';
+
+
+        //            html += '<div class="middle">';
+        //            html += '<div class="city">' + weather.city + '  <span> ' + weather.region + '</span></div>';
+        //            html += '<div class="temp">' + weather.alt.temp + '<span>&deg;C</span> </div>';
+        //            html += '</div>';
+
+        //            html += '<div class="nextdays">';
+
+        //            html += '<div class="days day2"><span class="d">' + weather.forecast[1].day + '</span> <span class="h">' + weather.forecast[1].alt.high + '&deg; </span> <span class="h">' + weather.forecast[1].alt.low + '&deg;  </div>';
+        //            html += '<div class="days day3"><span class="d">' + weather.forecast[2].day + '</span> <span class="h">' + weather.forecast[2].alt.high + '&deg; </span> <span class="h">' + weather.forecast[2].alt.low + '&deg;  </div>';
+        //            html += '<div class="days day4"><span class="d">' + weather.forecast[3].day + '</span> <span class="h">' + weather.forecast[3].alt.high + '&deg; </span> <span class="h">' + weather.forecast[3].alt.low + '&deg;  </div>';
+        //            html += '<div class="days day5"><span class="d">' + weather.forecast[4].day + '</span> <span class="h">' + weather.forecast[4].alt.high + '&deg; </span> <span class="h">' + weather.forecast[4].alt.low + '&deg;  </div>';
+        //            html += '<div class="days day1"><span class="d">' + weather.forecast[5].day + '</span> <span class="h">' + weather.forecast[5].alt.high + '&deg; </span> <span class="h">' + weather.forecast[5].alt.low + '&deg;  </div>';
+        //            html += '</div>';
+
+        //            $("#weather-one").html(html);
+        //        },
+        //        error: function (error) {
+        //            $("#weather-one").html('<p>' + error + '</p>');
+        //        }
+        //    });
+        //}
+    });
+</script>

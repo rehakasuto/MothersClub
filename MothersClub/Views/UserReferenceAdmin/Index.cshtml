@@ -1,0 +1,93 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="breadcrumbs">
+    <div class="breadcrumbs-inner">
+        <div class="row m-0">
+            <div class="col-sm-4">
+                <div class="page-header float-left">
+                    <div class="page-title">
+                        <h1>Sleepy Anneler Kulübü</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="page-header float-right">
+                    <div class="page-title">
+                        <ol class="breadcrumb text-right">
+                            <li><a href="/">Anasayfa</a></li>
+                            <li class="active">Referans Olunan Kullanıcılar</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <!-- Animated -->
+    <div class="animated fadeIn">
+        <div class="userReferences">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">Referans Olunan Kullanıcılar</div>
+                        <div class="card-body--">
+                            <div class="table-stats order-table ov-h">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Referans Olan Kişi</th>
+                                            <th>Referans Olunan Kişi</th>
+                                            <th>Kazanılan İndirim Tutarı</th>
+                                            <th>Referans Durumu</th>
+                                            <th>Referans Kurulma Tarihi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div> <!-- /.table-stats -->
+                        </div>
+                    </div> <!-- /.card -->
+                </div>  <!-- /.col-lg-12 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        loadUserReferences();
+        function loadUserReferences() {
+            $.ajax({
+                url: "/UserReferenceAdmin/RetrieveUserReferences",
+                method: 'GET',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    if (data.length > 0) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var obj = data[i];
+                            var _class = obj.status === 1 ? "badge badge-complete" : obj.status === -1 ? "badge badge-passive" : "badge badge-pending";
+                            var stateMessage = obj.status === 1 ? "Aktif" : obj.status === -1 ? "Pasif" : "Bekliyor";
+                            html += "<tr><td class='toLowerString'>" + obj.referenceUserName + "</td>><td class='toLowerString'>" + obj.mailAddress + "</td>><td>" + obj.totalDiscount + " TL</td>><td><span class='" + _class + "'>" + stateMessage + "</span></td><td>" + parseJsonDate(obj.createdDate) + "</td></tr>";
+                        }
+                    }
+                    else {
+                        html += "<tr><td>Sonuç Bulunamadı...</td></tr>";
+                    }
+                    $('.userReferences tbody').html(html);
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+    });
+</script>
+
+

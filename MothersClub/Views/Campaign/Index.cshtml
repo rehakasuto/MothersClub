@@ -1,0 +1,345 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="breadcrumbs">
+    <div class="breadcrumbs-inner">
+        <div class="row m-0">
+            <div class="col-sm-4">
+                <div class="page-header float-left">
+                    <div class="page-title">
+                        <h1>Sleepy Anneler Kulübü</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="page-header float-right">
+                    <div class="page-title">
+                        <ol class="breadcrumb text-right">
+                            <li><a href="/">Anasayfa</a></li>
+                            <li class="active">Kampanya Detayı</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <!-- Animated -->
+    <div class="animated fadeIn">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header"><strong>Kampanya Kuralı</strong><small id="action"> Tanımla</small><span id="campaignRuleId" hidden></span></div>
+                    <div class="card-body card-block">
+                        <form action="#" method="post" id="addRule">
+                            <div class="row form-group">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="index" class=" form-control-label">Sıralama #*</label>
+                                        <input type="number" id="index" min="1" required value="1" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="name" class=" form-control-label">Kural Adı*</label>
+                                        <input type="text" id="name" placeholder="Lütfen kural adı giriniz" required class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label for="description" class=" form-control-label">Açıklama</label>
+                                        <textarea id="description" placeholder="Tanımlayacağınız kurala ait detayları giriniz" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="ruleType" class=" form-control-label">Kural Tipi</label>
+                                        <select id="ruleType" class="form-control"></select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="count" class=" form-control-label">Tutar*</label>
+                                        <input type="number" id="count" min="1" required value="1" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="atLeastPrice" class=" form-control-label">En Az Harcama Tutarı*</label>
+                                        <input type="number" id="atLeastPrice" min="0" required value="0" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="activationDay" class=" form-control-label">Kaç Gün Sonra Aktif Olacak ?*</label>
+                                        <input type="number" id="activationDay" min="0" required value="15" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-actions form-group">
+                                <button id="btnRuleAction" type="submit" class="btn btn-primary btn-sm">Yeni Kural Ekle</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="campaignRules">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header"><span id="campaignName"></span><span id="cid" style="display:none;"></span></div>
+                        <div class="card-body--">
+                            <div class="table-stats order-table ov-h">
+                                <table class="table table-striped" id="gridCampaign">
+                                    <thead>
+                                        <tr>
+                                            <th>Sıralama #</th>
+                                            <th>Kural Adı</th>
+                                            <th>Kural Açıklaması</th>
+                                            <th>Kural Tipi</th>
+                                            <th>Tutar</th>
+                                            <th>En Az Harcama Tutarı</th>
+                                            <th>Kaç Gün Sonra Aktif Olacak ?</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div> <!-- /.table-stats -->
+                        </div>
+                    </div> <!-- /.card -->
+                </div>  <!-- /.col-lg-12 -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        var state = "save";
+        var lastIndex = 0;
+        LoadCampaignRules();
+        $("#addRule").submit(function (event) {
+            event.preventDefault();
+            if (state === "save") {
+                saveRule();
+            }
+            else if (state === "update") {
+                if (window.confirm("Kampanya kuralını güncellemek istediğinize emin misiniz ?")) {
+                    updateRule();
+                }
+            }
+        });
+        $('#gridCampaign').on('click', '.btnDeleteRule', deleteRule);
+
+        function deleteRule() {
+            if (window.confirm("Kampanya kuralını silmek istediğinize emin misiniz ?")) {
+                var $row = $(this).closest('tr');
+                var campaignRuleId = $('.btnDeleteRule', $row).attr('data-info');
+                $.ajax({
+                    url: "/Campaign/DeleteCampaignRule?campaignRuleId=" + campaignRuleId,
+                    type: "POST",
+                    dataType: "json",
+                    success: function (response) {
+                        LoadCampaignRules();
+                        ResetInputs(true);
+                        $.notify(response.responseText, "success");
+                    },
+                    error: function (err) {
+                        $.notify(err.statusText, "error");
+                    }
+                });
+            }
+        }
+
+        $('#index').on('input', function () {
+            var campaignId = $('#cid').text();
+            var index = $('#index').val();
+            if (index === "") {
+                return;
+            }
+            $.ajax({
+                url: "/Campaign/RetrieveCampaignRule?campaignId=" + campaignId + "&index=" + index,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    if (data.count !== undefined) {
+                        $('#action').text(' Güncelle');
+                        $('#btnRuleAction').text('Kuralı Güncelle');
+                        $('#campaignRuleId').val(data.id);
+                        $('#name').val(data.name);
+                        $('#description').val(data.description);
+                        $("#ruleType").val(data.ruleType);
+                        $('#atLeastPrice').val(data.atLeastPrice);
+                        $('#count').val(data.count);
+                        $('#activationDay').val(data.activationDay);
+                        state = "update";
+                    }
+                    else {
+                        $('#action').text(' Tanımla');
+                        state = "save";
+                        $('#campaignRuleId').val('');
+                        ResetInputs(false);
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        });
+
+        function ResetInputs(withIndex) {
+            $('#btnRuleAction').text('Yeni Kural Ekle');
+            $('#name').val('').attr("placeholder", "Lütfen kural adı giriniz");;
+            $('#description').val('').attr("placeholder", "Tanımlayacağınız kurala ait detayları giriniz");;
+            $("#ruleType").val($("#ruleType option:first").val());
+            $('#atLeastPrice').val('0');
+            $('#count').val('1');
+            if (withIndex) {
+                $('#index').val(lastIndex + 1);
+            }
+            $('#activationDay').val('15');
+        }
+
+        function saveRule() {
+            var name = $('#name').val().trim();
+            var description = $('#description').val().trim();
+            var ruleType = $('#ruleType option:selected').val();
+            var atLeastPrice = $('#atLeastPrice').val();
+            var count = $('#count').val();
+            var index = $('#index').val();
+            var activationDay = $('#activationDay').val();
+            var campaignId = $('#cid').text();
+
+            var query = {
+                name: name,
+                description: description,
+                ruleType: ruleType,
+                atLeastPrice: atLeastPrice,
+                count: count,
+                index: index,
+                activationDay: activationDay,
+                campaignId: campaignId
+            };
+
+            $.ajax({
+                url: "/Campaign/AddCampaignRule",
+                type: "POST",
+                dataType: "json",
+                data: query,
+                success: function (response) {
+                    LoadCampaignRules();
+                    ResetInputs(true);
+                    $.notify(response.responseText, "success");
+                },
+                error: function (err) {
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+
+
+        function updateRule() {
+            var name = $('#name').val().trim();
+            var description = $('#description').val().trim();
+            var ruleType = $('#ruleType option:selected').val();
+            var atLeastPrice = $('#atLeastPrice').val();
+            var count = $('#count').val();
+            var index = $('#index').val();
+            var activationDay = $('#activationDay').val();
+            var campaignId = $('#cid').text();
+            var campaignRuleId = $('#campaignRuleId').val();
+
+            var query = {
+                name: name,
+                description: description,
+                ruleType: ruleType,
+                atLeastPrice: atLeastPrice,
+                count: count,
+                index: index,
+                activationDay: activationDay,
+                campaignId: campaignId,
+                campaignRuleId: campaignRuleId
+            };
+
+            $.ajax({
+                url: "/Campaign/UpdateCampaignRule",
+                type: "POST",
+                dataType: "json",
+                data: query,
+                success: function (response) {
+                    LoadCampaignRules();
+                    ResetInputs(true);
+                    $.notify(response.responseText, "success");
+                },
+                error: function (err) {
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+
+        function LoadOptions() {
+            $.ajax({
+                url: "/Campaign/RetrieveOptions",
+                method: 'GET',
+                success: function (data) {
+                    if (data.length > 0) {
+                        var html = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var obj = data[i];
+                            html += "  <option value='" + obj.value + "'>" + obj.text + "</option>";
+                        }
+                        $('#ruleType').html(html);
+                    }
+                }
+            });
+        }
+
+        function LoadCampaignRules() {
+            LoadOptions();
+            $.ajax({
+                url: "/Campaign/RetrieveCampaign",
+                method: 'GET',
+                success: function (obj) {
+                    var html = "";
+                    if (obj != undefined) {
+                        $('#campaignName').text(obj.name);
+                        $('#cid').text(obj.id);
+                        $.ajax({
+                            url: "/Campaign/RetrieveCampaignRules?campaignId=" + obj.id,
+                            method: 'GET',
+                            success: function (rules) {
+                                if (rules.length > 0) {
+                                    for (var j = 0; j < rules.length; j++) {
+                                        var rule = rules[j];
+                                        var description = rule.description === null ? '' : rule.description;
+                                        html += "<tr><td>" + rule.index + "</td><td>" + rule.name + "</td><td>" + description + "</td><td>" + rule.ruleType + "</td><td>" + rule.count + "</td><td>" + rule.atLeastPrice + "</td><td>" + rule.activationDay + "</td><td><button data-info=" + rule.id + " type='button' title='Sil' class='btn btn-danger btn-sm btnDeleteRule'><i class='fa fa-trash'></i></button></td></tr>";
+                                        lastIndex = rule.index;
+                                    }
+                                    $('#index').val(lastIndex + 1);
+                                }
+                                else {
+                                    html += "<tr><td>Sonuç Bulunamadı...</td></tr>";
+                                }
+                                $('.campaignRules tbody').html(html);
+                            }
+                        });
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                    $.notify(err.statusText, "error");
+                }
+            });
+        }
+    });
+</script>
